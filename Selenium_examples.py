@@ -169,3 +169,38 @@ try:
         driver.add_cookie(cookie) 
 
     driver.refresh()
+
+    # Переход на страницу
+    wait_for(driver, By.XPATH, 
+            '//div[@class="class_pt_1 ' \
+            'class_pt_2" and contains(text(), "Моя страница")]').click()
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+    print(f"{get_timestamp()} - Cookies loaded successfully")
+    tg_send_msg(f"Cookies loaded successfully")
+
+    # Логика проверки на доступность кнопки
+    while True:
+        try:    
+            launch_unavailable = wait_for(driver, By.XPATH, '//span[text()="Временно недоступно"]', clickable=True)
+            if launch_unavailable:
+                driver.refresh()
+                time.sleep(60)
+            else:
+                launch_present = wait_for(driver, By.XPATH, '//span[text()="Запустить"]', clickable=True)
+                if launch_present:
+                    launch_present.click()
+                    time.sleep(5)
+                    driver.refresh()
+                    print(f"{get_timestamp()} - Процесс запущен успешно")
+                    tg_send_msg(f"Процесс запущен успешно")
+                else:
+                    print(f"{get_timestamp()} - Внимание. Кнопка запуска НЕ НАЖАТА")
+                    tg_send_msg(f"Внимание\n\nКнопка запуска НЕ НАЖАТА")
+                    
+        # TODO - Здесь нормальная обработка ошибок с разными типами error, исходя из контекста скрипта и т.п.       
+        except Exception as e:
+            print(f"{get_timestamp()} - Произошла ошибка: {e}")
+            tg_send_msg(f"Произошла ошибка") # с markdown выводить текст ошибки
+
+
+

@@ -178,7 +178,22 @@ try:
     print(f"{get_timestamp()} - Cookies loaded successfully")
     tg_send_msg(f"Cookies loaded successfully")
 
-    # Логика проверки на доступность кнопки
+    # Получение размеров фрейма
+    wait_for(driver, By.XPATH,'//span[text()="Frames"]').click()
+    frame1_width = wait_for(driver, By.XPATH, '//iframe[@id="frame1"]').get_attribute("width")
+    frame1_height = wait_for(driver, By.XPATH, '//iframe[@id="frame1"]').get_attribute("height")
+    print(f"frame1 fixed dimensions are: {frame1_width[:-2]}x{frame1_height[:-2]}px")
+    
+    # Алерт Accept
+    print(f"Confirm section:")
+    wait_for(driver,By.XPATH, '//button[@id="confirmButton"]').click()
+    WebDriverWait(driver, 10).until(EC.alert_is_present())
+    alert = driver.switch_to.alert
+    print(f"On button click, confirm box will appear: {alert.text}")
+    alert.accept()
+    print(f"Подтверждение всплытия Алерта: {wait_for(driver, By.XPATH,'//span[@id="ex_01_28"]').text}\n")
+    
+    # Бесконечная проверка кнопки (в рамках отдельного скрипта)
     while True:
         try:    
             launch_unavailable = wait_for(driver, By.XPATH, '//span[text()="Временно недоступно"]', clickable=True)
